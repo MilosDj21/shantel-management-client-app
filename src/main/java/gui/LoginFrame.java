@@ -4,8 +4,12 @@
  */
 package gui;
 
+import connection.DBConnection;
 import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
+import javax.swing.JOptionPane;
+import models.UserModel;
+import services.UserService;
 
 /**
  *
@@ -39,12 +43,22 @@ public class LoginFrame extends javax.swing.JFrame {
         });
 
         txtPassword.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        txtPassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtPasswordKeyReleased(evt);
+            }
+        });
 
         btnIzlaz.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
         btnIzlaz.setText("Izlaz");
 
         btnLogin.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
         btnLogin.setText("Login");
+        btnLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoginActionPerformed(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Ubuntu", 0, 36)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -117,10 +131,36 @@ public class LoginFrame extends javax.swing.JFrame {
 
     private void txtUsernameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsernameKeyReleased
         if(evt.getKeyCode() == KeyEvent.VK_ENTER){
-            
+            login();
         }
     }//GEN-LAST:event_txtUsernameKeyReleased
 
+    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
+        login();
+    }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void txtPasswordKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPasswordKeyReleased
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER){        
+            login();
+        }
+    }//GEN-LAST:event_txtPasswordKeyReleased
+
+    private void login(){
+        String username = txtUsername.getText().trim();
+        String password = txtPassword.getText().trim();
+        if(username.isEmpty() || password.isEmpty()){
+            JOptionPane.showMessageDialog(null, "Morate popuniti oba polja!");
+        }else{
+            DBConnection conn = new DBConnection();
+            UserModel user = new UserModel();
+            user.setUsername(username);
+            user.setPassword(password);
+            UserService service = new UserService();
+            service.login(user, conn);            
+        }
+        
+        
+    }
     
     
     
