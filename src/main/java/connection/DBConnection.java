@@ -50,9 +50,11 @@ public class DBConnection {
                 os.write(requestBody.getBytes("UTF-8"));
                 os.close();
             }
-            InputStream is = conn.getInputStream();
-            jsonResponse = streamReader(is);
-            is.close();
+            if(!methodType.equals("DELETE")){
+                InputStream is = conn.getInputStream();
+                jsonResponse = streamReader(is);
+                is.close();
+            }
         }catch(IOException e){
             e.printStackTrace();
         }
