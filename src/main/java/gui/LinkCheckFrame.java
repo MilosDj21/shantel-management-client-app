@@ -4,17 +4,67 @@
  */
 package gui;
 
+import connection.DBConnection;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import main.CustomTableRenderer;
+import models.LinkCheckModel;
+import models.LinkModel;
+import models.MessageModel;
+import models.UserModel;
+import services.LinkCheckService;
+import services.MessageService;
+
 /**
  *
  * @author ikaraz
  */
-public class RequestsFrame extends javax.swing.JFrame {
-
-    /**
-     * Creates new form RequestsFrame
-     */
-    public RequestsFrame() {
+public class LinkCheckFrame extends javax.swing.JFrame {
+    
+    private List<MessageModel> messages;
+    
+    public LinkCheckFrame() {
         initComponents();
+        messages = new ArrayList<>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DBConnection conn = new DBConnection(UserModel.CURRENT_USER.getUsername(), UserModel.CURRENT_USER.getPassword());
+                List<LinkCheckModel> linkList = LinkCheckService.findAllByUserId(UserModel.CURRENT_USER, conn);                
+                List<MessageModel> messageList = MessageService.findAll(conn);
+                List<LinkCheckModel> finalLinkList = new ArrayList<>();         
+                Collections.reverse(linkList);
+                Collections.reverse(messageList);
+                for(MessageModel m: messageList){
+                    if(!finalLinkList.contains(m.getLinkZaProveru()) && m.getLinkZaProveru().getKorisnik().equals(UserModel.CURRENT_USER) && m.getStatus().equals("ZA_MENADZERA")){
+                        finalLinkList.add(m.getLinkZaProveru());
+                    }
+                }
+                for(LinkCheckModel l: linkList){
+                    if(!finalLinkList.contains(l)){
+                        finalLinkList.add(l);
+                    }
+                }     
+                messages = messageList;
+                
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        fillTable(finalLinkList, messageList);
+                    }
+                });
+            }
+        }).start();
     }
 
     /**
@@ -26,22 +76,208 @@ public class RequestsFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        table = new javax.swing.JTable();
+        txtPretrazi = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        btnIzlaz = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtAreaChat = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
+        txtChat = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        btnIzlaz1 = new javax.swing.JButton();
+        btnIzlaz3 = new javax.swing.JButton();
+        btnIzlaz4 = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        table.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(table);
+
+        txtPretrazi.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
+
+        jLabel1.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
+        jLabel1.setText("Pretrazi:");
+
+        btnIzlaz.setText("Izlaz");
+
+        txtAreaChat.setEditable(false);
+        txtAreaChat.setColumns(20);
+        txtAreaChat.setLineWrap(true);
+        txtAreaChat.setRows(5);
+        jScrollPane2.setViewportView(txtAreaChat);
+
+        jLabel2.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
+        jLabel2.setText("Detalji:");
+
+        txtChat.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
+
+        jLabel4.setFont(new java.awt.Font("Liberation Sans", 0, 36)); // NOI18N
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Moji linkovi za proveru");
+
+        btnIzlaz1.setText("Svi Klijenti");
+
+        btnIzlaz3.setText("Svi Linkovi Za Proveru");
+
+        btnIzlaz4.setText("Novi Zahtev Za Proveru");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
+                            .addComponent(txtPretrazi))
+                        .addGap(27, 27, 27)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtChat)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 543, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btnIzlaz4, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
+                                    .addComponent(btnIzlaz3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnIzlaz, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnIzlaz1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addGap(0, 21, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(37, 37, 37)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtChat, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(22, 22, 22)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPretrazi, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnIzlaz1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnIzlaz4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnIzlaz, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnIzlaz3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(46, 46, 46))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void tableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableMouseClicked
+        fillChat(Long.parseLong(table.getValueAt(table.getSelectedRow(), 0).toString()), messages);
+    }//GEN-LAST:event_tableMouseClicked
+
+    private boolean fillMap(List<MessageModel> list, LinkCheckModel l){
+        for(MessageModel m: list){
+            if(m.getLinkZaProveru().equals(l) && m.getStatus().equals("ZA_MENADZERA")){
+                return true;
+            }                      
+        }
+        return false;
+    }
+    
+    private void fillTable(List<LinkCheckModel> linkList, List<MessageModel> messageList){
+        DefaultTableModel dtm = new DefaultTableModel();
+        dtm.addColumn("Id");
+        dtm.addColumn("Link");
+        dtm.addColumn("Status");
+        dtm.addColumn("");
+        if(linkList.isEmpty()){
+            dtm.addRow(new String[]{"","Nema podataka u bazi","",""});
+        }else{
+            for(LinkCheckModel l: linkList){
+                if(fillMap(messageList,l)){
+                    dtm.addRow(new String[]{String.valueOf(l.getId()), l.getUrl(), l.getStatus(), "*"});
+                }
+                else{
+                    dtm.addRow(new String[]{String.valueOf(l.getId()), l.getUrl(), l.getStatus(), ""});
+                }
+            }            
+        }
+        table.setModel(dtm);
+        table.setDefaultRenderer(Object.class, new CustomTableRenderer());
+        table.setFont(new Font("Tahoma", Font.PLAIN, 17));
+        table.setRowHeight(25);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.getTableHeader().setResizingAllowed(false);
+        table.getColumnModel().getColumn(0).setPreferredWidth(110);
+        table.getColumnModel().getColumn(1).setPreferredWidth(350);
+        table.getColumnModel().getColumn(2).setPreferredWidth(120);
+        table.getColumnModel().getColumn(3).setPreferredWidth(20);
+        table.getSelectionModel().setSelectionInterval(0, 0);
+        fillChat(Long.parseLong(table.getValueAt(table.getSelectedRow(), 0).toString()), messageList);
+    }
+    
+    private void fillChat(long linkId, List<MessageModel> messageList){
+        String chat = "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
+        for(MessageModel m: messageList){
+            if(m.getLinkZaProveru().getId() == linkId){
+                if(m.getStatus().equals("ZA_MENADZERA")){
+                    chat += sdf.format(Timestamp.valueOf(m.getVremePoruke())) + " Stefan:\n";
+                }else if(m.getStatus().equals("ZA_STEFANA")){
+                    chat += sdf.format(Timestamp.valueOf(m.getVremePoruke())) + " " + m.getLinkZaProveru().getKorisnik().getIme() + ":\n";
+                }
+                chat += m.getPoruka() + "\n\n";
+            }
+        }
+        txtAreaChat.setText(chat);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnIzlaz;
+    private javax.swing.JButton btnIzlaz1;
+    private javax.swing.JButton btnIzlaz3;
+    private javax.swing.JButton btnIzlaz4;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable table;
+    private javax.swing.JTextArea txtAreaChat;
+    private javax.swing.JTextField txtChat;
+    private javax.swing.JTextField txtPretrazi;
     // End of variables declaration//GEN-END:variables
 }

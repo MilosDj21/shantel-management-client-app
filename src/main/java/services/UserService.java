@@ -5,18 +5,8 @@
 package services;
 
 import connection.DBConnection;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import models.UserModel;
-import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -26,41 +16,47 @@ public class UserService {
     
     private static String CONNECTION_URL = "http://localhost:8080";
     
-    public void login(UserModel user, DBConnection conn){
+    public static UserModel login(UserModel user, DBConnection conn){
         String requestBody = "{ "
                 + "\"username\": \"" + user.getUsername() + "\","
                 + "\"password\": \"" + user.getPassword() + "\""
                 + "}";
-        readJson(CONNECTION_URL + "/login", requestBody, "POST", conn);
+        String response = conn.request(CONNECTION_URL + "/login", "POST", requestBody);
+        if(response.isEmpty()){
+            return null;
+        }
+        JSONObject jsonResponse = new JSONObject(response);
+        return parseJson(jsonResponse);        
     }
     
-    public String saveNew(UserModel user){
-        return "{ "
-                + "username: " + user.getUsername() + ","
-                + "password: " + user.getPassword() + ","
-                + "ime: " + user.getIme() + ","
-                + "prezime: " + user.getPrezime() + ","
-                + "status: " + user.getStatus() + ","
-                + "uiTema: " + user.getUiTema()
+    public static UserModel saveOne(UserModel user, DBConnection conn){
+        String requestBody = "{"
+                + "\"id\": " + user.getId() + ","
+                + "\"username\": \"" + user.getUsername() + "\","
+                + "\"password\": \"" + user.getPassword() + "\","
+                + "\"ime\": \"" + user.getIme() + "\","
+                + "\"prezime\": \"" + user.getPrezime() + "\","
+                + "\"status\": \"" + user.getStatus() + "\","
+                + "\"uiTema\": \"" + user.getUiTema() + "\""
                 + "}";
-    }
-    
-    public String updateUser(UserModel user){
-        return "{ "
-                + "id: " + user.getId() + ","
-                + "username: " + user.getUsername() + ","
-                + "password: " + user.getPassword() + ","
-                + "ime: " + user.getIme() + ","
-                + "prezime: " + user.getPrezime() + ","
-                + "status: " + user.getStatus() + ","
-                + "uiTema: " + user.getUiTema()
-                + "}";
-    }
-    
-    private void readJson(String url, String requestBody, String methodType, DBConnection conn){
-        String jsonResponse = conn.request(url, methodType, requestBody);
+        JSONObject jsonResponse = new JSONObject(conn.request(CONNECTION_URL + "/users", "POST", requestBody));
+        return parseJson(jsonResponse);
         
-        System.out.println(jsonResponse);
+    }
+
+    public static void deleteOne(long id, DBConnection conn){
+        conn.request(CONNECTION_URL + "/users/" + id, "DELETE", "");
     }
     
+    private static UserModel parseJson(JSONObject jsonResponse){
+        UserModel user = new UserModel();
+        user.setId(jsonResponse.getLong("id"));  
+        user.setUsername(jsonResponse.getString("username"));
+        user.setPassword(jsonResponse.getString("password"));
+        user.setIme(jsonResponse.getString("ime"));
+        user.setPrezime(jsonResponse.getString("prezime"));
+        user.setStatus(jsonResponse.getString("status"));
+        user.setUiTema(jsonResponse.getString("uiTema")); 
+        return user;
+    }
 }

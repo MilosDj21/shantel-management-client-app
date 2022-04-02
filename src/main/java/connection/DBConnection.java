@@ -54,7 +54,7 @@ public class DBConnection {
                 InputStream is = conn.getInputStream();
                 jsonResponse = streamReader(is);
                 is.close();
-            }
+            }            
         }catch(IOException e){
             e.printStackTrace();
         }

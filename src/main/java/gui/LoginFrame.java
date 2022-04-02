@@ -16,9 +16,12 @@ import services.UserService;
  * @author ikaraz
  */
 public class LoginFrame extends javax.swing.JFrame {
+    
+    private LoginFrame currentFrame;
 
     public LoginFrame() {
         initComponents();
+        currentFrame = this;
     }
 
     @SuppressWarnings("unchecked")
@@ -146,22 +149,44 @@ public class LoginFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_txtPasswordKeyReleased
 
     private void login(){
-        String username = txtUsername.getText().trim();
-        String password = txtPassword.getText().trim();
-        if(username.isEmpty() || password.isEmpty()){
-            JOptionPane.showMessageDialog(null, "Morate popuniti oba polja!");
-        }else{
-            DBConnection conn = new DBConnection();
-            UserModel user = new UserModel();
-            user.setUsername(username);
-            user.setPassword(password);
-            UserService service = new UserService();
-            service.login(user, conn);            
-        }
-        
-        
-    }
-    
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String username = txtUsername.getText().trim();
+                String password = txtPassword.getText().trim();
+                username = username.replace("\\", "");
+                password = password.replace("\\", "");
+                if(username.isEmpty() || password.isEmpty()){
+                    JOptionPane.showMessageDialog(null, "Morate popuniti oba polja!");
+                }else{
+                    DBConnection conn = new DBConnection();
+                    UserModel user = new UserModel();
+                    user.setUsername(username);
+                    user.setPassword(password);
+                    user = UserService.login(user, conn);                    
+                    System.out.println(user);
+                    if(user != null){
+                        user.setPassword(password);
+                        UserModel.CURRENT_USER = user;
+                        EventQueue.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                LinkCheckFrame frame = new LinkCheckFrame();
+                                frame.setLocationRelativeTo(null);
+                                frame.setResizable(false);
+                                frame.setVisible(true);
+                                currentFrame.dispose();
+                            }
+                        });
+                        
+                    }else{
+                        JOptionPane.showMessageDialog(null, "Neispravan username ili password!");
+                    }
+        }   
+            }
+        }).start();
+            
+    }    
     
     
     public static void main(String args[]) {
